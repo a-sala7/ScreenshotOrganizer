@@ -25,16 +25,25 @@ namespace Screenshot_Organizer
             string json = JsonConvert.SerializeObject(taskList, Formatting.Indented);
             File.WriteAllText("organizer.json", json);
         }
+        public ListViewItem getTaskAsListViewItem(Task t)
+        {
+            var theItem = new ListViewItem(t.FileName);
+            theItem.SubItems.Add(string.Join(",", t.Extensions));
+            theItem.SubItems.Add(t.SourceFolder);
+            theItem.SubItems.Add(t.DestinationFolder);
+            return theItem;
+        }
+        public Task getListViewItemAsTask(ListViewItem i)
+        {
+            var theTask = new Task(i.SubItems[0].Text, i.SubItems[1].Text.ToLower().Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries), i.SubItems[2].Text, i.SubItems[3].Text);
+            return theTask;
+        }
         public void refreshListView()
         {
             listView1.Items.Clear();
             foreach (Task t in taskList)
             {
-                var x = new ListViewItem(t.FileName);
-                x.SubItems.Add(string.Join(",", t.Extensions));
-                x.SubItems.Add(t.SourceFolder);
-                x.SubItems.Add(t.DestinationFolder);
-                listView1.Items.Add(x);
+                listView1.Items.Add(getTaskAsListViewItem(t));
             }
         }
         private void Form1_Load(object sender, EventArgs e)
@@ -127,6 +136,11 @@ namespace Screenshot_Organizer
         }
         private void organizeBtn_Click(object sender, EventArgs e)
         {
+            if(taskList.Count < 1)
+            {
+                MessageBox.Show("Nothing to organize.");
+                return;
+            }
             //var opStart = DateTime.Now;
             foreach(Task x in taskList)
             {
@@ -158,10 +172,13 @@ namespace Screenshot_Organizer
         private void removeBtn_Click(object sender, EventArgs e)
         {
             if (listView1.SelectedItems.Count < 1)
-                return;
-            foreach(ListViewItem curr in listView1.SelectedItems)
             {
-                var taskToRemove = new Task(curr.SubItems[0].Text, curr.SubItems[1].Text.ToLower().Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries), curr.SubItems[2].Text, curr.SubItems[3].Text);
+                MessageBox.Show("No items selected.");
+                return;
+            }
+            foreach (ListViewItem curr in listView1.SelectedItems)
+            {
+                var taskToRemove = getListViewItemAsTask(curr);
                 RemoveTask(taskToRemove);
             }
             refreshListView();
@@ -222,9 +239,17 @@ namespace Screenshot_Organizer
             if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 dstFolderBox.Text = fbd.SelectedPath;
         }
+        public bool isAlpha(char c)
+        {
+            if (c >= 'a' && c <= 'z')
+                return true;
+            if (c >= 'A' && c <= 'Z')
+                return true;
+            return false;
+        }
         public bool validPath(string p)
         {
-            if(p.Contains('\\') && p.Contains(':'))
+            if(isAlpha(p[0]) && p[1] == ':' && p[2] == '\\')
             {
                 return true;
             }
