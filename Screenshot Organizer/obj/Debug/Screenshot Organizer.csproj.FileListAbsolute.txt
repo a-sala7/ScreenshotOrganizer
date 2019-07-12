@@ -1,0 +1,12 @@
+C:\Users\Admin\Desktop\C#\Screenshot Organizer\Screenshot Organizer\bin\Debug\Screenshot Organizer.exe.config
+C:\Users\Admin\Desktop\C#\Screenshot Organizer\Screenshot Organizer\bin\Debug\Screenshot Organizer.exe
+C:\Users\Admin\Desktop\C#\Screenshot Organizer\Screenshot Organizer\bin\Debug\Screenshot Organizer.pdb
+C:\Users\Admin\Desktop\C#\Screenshot Organizer\Screenshot Organizer\obj\Debug\Screenshot Organizer.csprojResolveAssemblyReference.cache
+C:\Users\Admin\Desktop\C#\Screenshot Organizer\Screenshot Organizer\obj\Debug\Screenshot_Organizer.Form1.resources
+C:\Users\Admin\Desktop\C#\Screenshot Organizer\Screenshot Organizer\obj\Debug\Screenshot_Organizer.Properties.Resources.resources
+C:\Users\Admin\Desktop\C#\Screenshot Organizer\Screenshot Organizer\obj\Debug\Screenshot Organizer.csproj.GenerateResource.Cache
+C:\Users\Admin\Desktop\C#\Screenshot Organizer\Screenshot Organizer\obj\Debug\Screenshot Organizer.exe
+C:\Users\Admin\Desktop\C#\Screenshot Organizer\Screenshot Organizer\obj\Debug\Screenshot Organizer.pdb
+C:\Users\Admin\Desktop\Screenshot Organizer Alpha\Screenshot Organizer\bin\Debug\Screenshot Organizer.exe.config
+C:\Users\Admin\Desktop\Screenshot Organizer Alpha\Screenshot Organizer\obj\Debug\Screenshot Organizer.exe
+C:\Users\Admin\Desktop\Screenshot Organizer Alpha\Screenshot Organizer\obj\Debug\Screenshot Organizer.pdb
