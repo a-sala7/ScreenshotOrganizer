@@ -7,3 +7,5 @@ C:\Users\Admin\Desktop\C#\Screenshot Organizer\Screenshot Organizer\obj\Release\
 C:\Users\Admin\Desktop\C#\Screenshot Organizer\Screenshot Organizer\obj\Release\Screenshot Organizer.exe
 C:\Users\Admin\Desktop\C#\Screenshot Organizer\Screenshot Organizer\obj\Release\Screenshot Organizer.pdb
 C:\Users\Admin\Desktop\C#\Screenshot Organizer\Screenshot Organizer\obj\Release\Screenshot Organizer.csprojResolveAssemblyReference.cache
+C:\Users\Admin\Desktop\C#\Screenshot Organizer\Screenshot Organizer\bin\Release\Newtonsoft.Json.dll
+C:\Users\Admin\Desktop\C#\Screenshot Organizer\Screenshot Organizer\bin\Release\Newtonsoft.Json.xml

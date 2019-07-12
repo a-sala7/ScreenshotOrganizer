@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.IO;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using Newtonsoft.Json;
 
 namespace Screenshot_Organizer
 {
@@ -17,162 +13,244 @@ namespace Screenshot_Organizer
         {
             InitializeComponent();
         }
+        public List<Task> taskList = new List<Task>();
+        public string currDir = Directory.GetCurrentDirectory();
         public void readList()
         {
-            using (StreamReader reader = new StreamReader("organizer.cfg", true))
+            string json = File.ReadAllText("organizer.json");
+            taskList = JsonConvert.DeserializeObject<List<Task>>(json);
+        }
+        public void writeList()
+        {
+            string json = JsonConvert.SerializeObject(taskList, Formatting.Indented);
+            File.WriteAllText("organizer.json", json);
+        }
+        public void refreshListView()
+        {
+            listView1.Items.Clear();
+            foreach (Task t in taskList)
             {
-                string currLine = reader.ReadLine();
-                while (currLine != null)
-                {
-                    string[] currData = currLine.Split(',');
-                    ListViewItem currItem = new ListViewItem(currData[0]);
-                    currItem.SubItems.Add(currData[1]);
-                    string exts = "";
-                    int sz = currData.Length;
-                    for (int i = 2; i < sz; i++)
-                    {
-                        if (i == sz - 1)
-                            exts += currData[i];
-                        else
-                        {
-                            exts += currData[i];
-                            exts += ',';
-                        }
-                    }
-                    currItem.SubItems.Add(exts);
-                    listView1.Items.Add(currItem);
-                    currLine = reader.ReadLine();
-                }
+                var x = new ListViewItem(t.FileName);
+                x.SubItems.Add(string.Join(",", t.Extensions));
+                x.SubItems.Add(t.SourceFolder);
+                x.SubItems.Add(t.DestinationFolder);
+                listView1.Items.Add(x);
             }
         }
-        private void browseBtn_Click(object sender, EventArgs e)
-        {
-            var fbd = new FolderBrowserDialog();
-            if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                folderNameBox.Text = fbd.SelectedPath;
-        }
-
         private void Form1_Load(object sender, EventArgs e)
         {
-            if (!File.Exists("organizer.cfg"))
+            if (!File.Exists("organizer.json"))
             {
-                File.Create("organizer.cfg").Close();
+                File.Create("organizer.json").Close();
+                File.WriteAllText("organizer.json", "[]");
             }
             readList();
+            refreshListView();
+            srcFolderBox.Text = currDir;
         }
 
         private void addBtn_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(fileNameBox.Text) || string.IsNullOrWhiteSpace(folderNameBox.Text) || string.IsNullOrWhiteSpace(extensionsBox.Text))
+            if (string.IsNullOrWhiteSpace(fileNameBox.Text) || string.IsNullOrWhiteSpace(dstFolderBox.Text) || string.IsNullOrWhiteSpace(extensionsBox.Text) || string.IsNullOrWhiteSpace(srcFolderBox.Text))
+            {
+                MessageBox.Show("Data missing.");
                 return;
+            }
+            if (!validPath(srcFolderBox.Text))
+            {
+                MessageBox.Show("Invalid source path.");
+                return;
+            }
+            if (!validName(fileNameBox.Text))
+            {
+                MessageBox.Show("Invalid name.");
+                return;
+            }
+            var currTask = new Task(fileNameBox.Text, extensionsBox.Text.ToLower().Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries), srcFolderBox.Text, dstFolderBox.Text);
+            if (destFolderRadioCurr.Checked)
+            {
+                if (!validName(dstFolderBox.Text))
+                {
+                    MessageBox.Show("Invalid destination path");
+                    return;
+                }
+                currTask.DestinationFolder = currDir + @"\" + currTask.DestinationFolder;
+            }
+            if (!validPath(currTask.DestinationFolder))
+            {
+                MessageBox.Show("Invalid destination path");
+                return;
+            }
+            foreach (Task t in taskList)
+            {
+                if (TasksAreEqual(currTask, t))
+                {
+                    MessageBox.Show("Entry already exists.");
+                    return;
+                }
+            }
+            taskList.Add(currTask);
+            refreshListView();
+            writeList();
+        }
+        public bool TasksAreEqual(Task a, Task b)
+        {
+            if (a.FileName.ToLower() != b.FileName.ToLower())
+                return false;
+            if (a.SourceFolder.ToLower() != b.SourceFolder.ToLower())
+                return false;
+            if (a.DestinationFolder.ToLower() != b.DestinationFolder.ToLower())
+                return false;
+            if (a.Extensions.Length != b.Extensions.Length)
+                return false;
             else
             {
-                using (StreamWriter writer = new StreamWriter("organizer.cfg", true))
+                foreach (string s in a.Extensions)
                 {
-                    writer.Write("{0},{1},", fileNameBox.Text, folderNameBox.Text);
-                    if (extensionsBox.Text.ToLower() != "all")
-                    {
-                        string[] exts = extensionsBox.Text.Split(',');
-                        int sz = exts.Length;
-                        for (int i = 0; i < sz; i++)
-                        {
-                            if (i == sz - 1)
-                                writer.Write(exts[i]);
-                            else
-                                writer.Write(exts[i] + ',');
-                        }
-                        writer.WriteLine();
-                    }
-                    else
-                    {
-                        writer.WriteLine("all");
-                    }
+                    if (!b.Extensions.Contains(s))
+                        return false;
                 }
-                listView1.Items.Clear();
-                readList();
-                fileNameBox.Clear();
-                folderNameBox.Clear();
-                extensionsBox.Clear();
+            }
+            return true;
+        }
+        public void RemoveTask(Task a)
+        {
+            foreach(Task target in taskList)
+            {
+                if(a.FileName == target.FileName && a.SourceFolder == target.SourceFolder && a.DestinationFolder == target.DestinationFolder 
+                    && string.Join(",", a.Extensions) == string.Join(",", target.Extensions))
+                {
+                    taskList.Remove(target);
+                    return;
+                }
             }
         }
-
         private void organizeBtn_Click(object sender, EventArgs e)
         {
-            using (StreamReader reader = new StreamReader("organizer.cfg", true))
+            //var opStart = DateTime.Now;
+            foreach(Task x in taskList)
             {
-                string currLine = reader.ReadLine();
-                while (currLine != null)
+                if (!Directory.Exists(x.DestinationFolder))
+                    Directory.CreateDirectory(x.DestinationFolder);
+                if (x.Extensions[0] == "all")
                 {
-                    string[] currData = currLine.Split(',');
-                    int sz = currData.Length;
-                    string destination;
-                    if (currData[1].Contains(':'))
-                        destination = currData[1];
-                    else
-                        destination = @".\" + currData[1] + @"\";
-                    if (currData[2] == "all")
+                    string[] filesToMove = Directory.GetFiles(x.SourceFolder, x.FileName + "*.*");
+                    foreach (string f in filesToMove)
                     {
-                        string[] filesToMove = Directory.GetFiles(@".\", currData[0] + "*.*");
-                        if (filesToMove.Length > 0 && !Directory.Exists(destination))
-                        {
-                            Directory.CreateDirectory(destination);
-                        }
+                        File.Move(f, f.Replace(x.SourceFolder, x.DestinationFolder));
+                    }
+                } else
+                {
+                    foreach (string ext in x.Extensions)
+                    {
+                        string[] filesToMove = Directory.GetFiles(x.SourceFolder, x.FileName + "*." + ext);
                         foreach (string f in filesToMove)
-                        {
-                            File.Move(f, destination + f);
+                        { 
+                            File.Move(f, f.Replace(x.SourceFolder, x.DestinationFolder));
                         }
                     }
-                    else
-                    {
-                        for (int i = 2; i < sz; i++)
-                        {
-                            string[] filesToMove = Directory.GetFiles(@".\", currData[0] + "*." + currData[i]);
-                            if (filesToMove.Length > 0 && !Directory.Exists(destination))
-                            {
-                                Directory.CreateDirectory(destination);
-                            }
-                            foreach (string f in filesToMove)
-                            {
-                                File.Move(f, destination + f);
-                            }
-                        }
-                    }
-                    currLine = reader.ReadLine();
                 }
             }
+            //var opEnd = DateTime.Now;
+            //debugBox.Text = "Operation completed in: " + (opEnd - opStart).TotalMilliseconds.ToString() + "ms";
         }
 
         private void removeBtn_Click(object sender, EventArgs e)
         {
             if (listView1.SelectedItems.Count < 1)
                 return;
-            List<string> linesToRemove = new List<string>();
-            foreach (ListViewItem x in listView1.SelectedItems)
+            foreach(ListViewItem curr in listView1.SelectedItems)
             {
-                linesToRemove.Add(string.Format("{0},{1},{2}", x.SubItems[0].Text, x.SubItems[1].Text, x.SubItems[2].Text));
+                var taskToRemove = new Task(curr.SubItems[0].Text, curr.SubItems[1].Text.ToLower().Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries), curr.SubItems[2].Text, curr.SubItems[3].Text);
+                RemoveTask(taskToRemove);
             }
-            using (StreamReader reader = new StreamReader("organizer.cfg", true))
+            refreshListView();
+            writeList();
+        }
+
+        private void sourceFolderRadioCurr_CheckedChanged(object sender, EventArgs e)
+        {
+            if (sourceFolderRadioCurr.Checked)
             {
-                using (StreamWriter writer = new StreamWriter("temp.cfg", true))
-                {
-                    string currLine = reader.ReadLine();
-                    while (currLine != null)
-                    {
-                        bool removing = false;
-                        if (linesToRemove.Contains(currLine))
-                            removing = true;
-                        if (!removing)
-                        {
-                            writer.WriteLine(currLine);
-                        }
-                        currLine = reader.ReadLine();
-                    }
-                }
+                srcFolderBox.Enabled = false;
+                srcFolderBox.Text = currDir;
+                srcBrowseBtn.Enabled = false;
             }
-            File.Delete("organizer.cfg");
-            File.Move("temp.cfg", "organizer.cfg");
-            listView1.Items.Clear();
-            readList();
+            if (sourceFolderRadioPath.Checked)
+            {
+                srcFolderBox.Enabled = true;
+                srcBrowseBtn.Enabled = true;
+            }
+        }
+
+        private void destFolderRadioCurr_CheckedChanged(object sender, EventArgs e)
+        {
+            if (destFolderRadioCurr.Checked)
+            {
+                dstBrowseBtn.Enabled = false;
+            }
+            if (destFolderRadioPath.Checked)
+            {
+                dstBrowseBtn.Enabled = true;
+            }
+        }
+
+        private void allExtCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (allExtCheckbox.Checked)
+            {
+                extensionsBox.Enabled = false;
+                extensionsBox.Text = "all";
+            }
+            else
+            {
+                extensionsBox.Enabled = true;
+                extensionsBox.Text = "";
+            }
+        }
+
+        private void srcBrowseBtn_Click(object sender, EventArgs e)
+        {
+            var fbd = new FolderBrowserDialog();
+            if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                srcFolderBox.Text = fbd.SelectedPath;
+        }
+
+        private void dstBrowseBtn_Click(object sender, EventArgs e)
+        {
+            var fbd = new FolderBrowserDialog();
+            if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                dstFolderBox.Text = fbd.SelectedPath;
+        }
+        public bool validPath(string p)
+        {
+            if(p.Contains('\\') && p.Contains(':'))
+            {
+                return true;
+            }
+            return false;
+        }
+        public bool validName(string p)
+        {
+            string forbidden = "\\/:*?\"<>|";
+            foreach(char f in forbidden)
+            {
+                if (p.Contains(f))
+                    return false;
+            }
+            return true;
+        }
+    }
+    public class Task
+    {
+        public string FileName, SourceFolder, DestinationFolder;
+        public string[] Extensions;
+        public Task(string _fileName, string[] _extensions, string _sourceFolder, string _destinationFolder)
+        {
+            FileName = _fileName;
+            Extensions = _extensions;
+            SourceFolder = _sourceFolder;
+            DestinationFolder = _destinationFolder;
         }
     }
 }

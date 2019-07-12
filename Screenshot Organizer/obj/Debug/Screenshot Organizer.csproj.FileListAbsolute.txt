@@ -7,6 +7,8 @@ C:\Users\Admin\Desktop\C#\Screenshot Organizer\Screenshot Organizer\obj\Debug\Sc
 C:\Users\Admin\Desktop\C#\Screenshot Organizer\Screenshot Organizer\obj\Debug\Screenshot Organizer.csproj.GenerateResource.Cache
 C:\Users\Admin\Desktop\C#\Screenshot Organizer\Screenshot Organizer\obj\Debug\Screenshot Organizer.exe
 C:\Users\Admin\Desktop\C#\Screenshot Organizer\Screenshot Organizer\obj\Debug\Screenshot Organizer.pdb
-C:\Users\Admin\Desktop\Screenshot Organizer Alpha\Screenshot Organizer\bin\Debug\Screenshot Organizer.exe.config
-C:\Users\Admin\Desktop\Screenshot Organizer Alpha\Screenshot Organizer\obj\Debug\Screenshot Organizer.exe
-C:\Users\Admin\Desktop\Screenshot Organizer Alpha\Screenshot Organizer\obj\Debug\Screenshot Organizer.pdb
+C:\Users\Admin\Desktop\C#\Screenshot Organizer\Screenshot Organizer\bin\Debug\Newtonsoft.Json.dll
+C:\Users\Admin\Desktop\C#\Screenshot Organizer\Screenshot Organizer\bin\Debug\Newtonsoft.Json.xml
+C:\Users\Admin\Desktop\Screenshot Organizer Beta\Screenshot Organizer\bin\Debug\Screenshot Organizer.exe.config
+C:\Users\Admin\Desktop\Screenshot Organizer Beta\Screenshot Organizer\obj\Debug\Screenshot Organizer.exe
+C:\Users\Admin\Desktop\Screenshot Organizer Beta\Screenshot Organizer\obj\Debug\Screenshot Organizer.pdb
